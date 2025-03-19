@@ -1,16 +1,14 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { HomeScreen } from './components/HomeScreen';
-import { DetailsScreen } from './components/DetailsScreen';
-import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { CardViewer } from "./components/CardViewer";
+import { DeckBuilder } from "./components/DeckBuilder";
+import { AntDesign, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
+import { CardViewerRoute, DeckBuilderRoute, RouteNames } from "./classes/RouteNames";
 
 // Define the type for navigation parameters
-export type RootTabParamList = {
-  Home: undefined;
-  Details: undefined;
-};
+export type RootTabParamList = Record<RouteNames, undefined>;
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
@@ -20,29 +18,27 @@ export default function App() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
-
-            if (route.name === 'Home') {
-              iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'Details') {
-              iconName = focused ? 'list' : 'list-outline';
+            if (route.name === "CardViewer") {
+              return <MaterialCommunityIcons name="cards" size={size} color={color} />;
+            } else if (route.name === "DeckBuilder") {
+              return <Entypo name="book" size={size} color={color} />;
             }
 
-            return <Ionicons name={iconName as any} size={size} color={color} />;
+            return <AntDesign name="question" size={size} color={color} />;
           },
-          tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: 'gray',
+          tabBarActiveTintColor: "#007AFF",
+          tabBarInactiveTintColor: "gray"
         })}
       >
-        <Tab.Screen 
-          name="Home" 
-          component={HomeScreen}
-          options={{ title: 'FlashCard App' }}
+        <Tab.Screen
+          name={CardViewerRoute}
+          component={CardViewer}
+          options={{ title: "Card Viewer" }}
         />
-        <Tab.Screen 
-          name="Details" 
-          component={DetailsScreen}
-          options={{ title: 'Details' }}
+        <Tab.Screen
+          name={DeckBuilderRoute}
+          component={DeckBuilder}
+          options={{ title: "Deck Builder" }}
         />
       </Tab.Navigator>
     </NavigationContainer>
@@ -52,8 +48,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center"
+  }
 });
