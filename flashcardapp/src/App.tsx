@@ -2,9 +2,10 @@ import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { CardViewer } from "./components/CardViewer";
-import { DeckBuilder } from "./components/deckbuilder";
+import { DeckBuilder } from "./components/deckbuilder/DeckBuilder";
+import { ManageCards } from "./components/managecards/ManageCards";
 import { AntDesign, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
-import { CardViewerRoute, DeckBuilderRoute, RouteNames } from "./types/RouteNames";
+import { CardViewerRoute, DeckBuilderRoute, ManageCardsRoute, RouteNames } from "./types/RouteNames";
 
 // Define the type for navigation parameters
 export type RootTabParamList = Record<RouteNames, undefined>;
@@ -17,10 +18,12 @@ export default function App() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ focused, color, size }) => {
-            if (route.name === "CardViewer") {
+            if (route.name === CardViewerRoute) {
               return <MaterialCommunityIcons name="cards" size={size} color={color} />;
-            } else if (route.name === "DeckBuilder") {
+            } else if (route.name === DeckBuilderRoute) {
               return <Entypo name="book" size={size} color={color} />;
+            } else if (route.name === ManageCardsRoute) {
+              return <MaterialCommunityIcons name="card-plus-outline" size={size} color={color} />;
             }
 
             return <AntDesign name="question" size={size} color={color} />;
@@ -33,6 +36,11 @@ export default function App() {
           name={CardViewerRoute}
           component={CardViewer}
           options={{ title: "Card Viewer" }}
+        />
+        <Tab.Screen
+          name={ManageCardsRoute}
+          component={ManageCards}
+          options={{ title: "Manage Cards" }}
         />
         <Tab.Screen
           name={DeckBuilderRoute}

@@ -22,9 +22,7 @@ export function ViewCards() {
 
   useEffect(() => {
     if (selectedCard) {
-      setIsModified(
-        editedFront !== selectedCard.front || editedBack !== selectedCard.back
-      );
+      setIsModified(editedFront !== selectedCard.front || editedBack !== selectedCard.back);
     }
   }, [editedFront, editedBack, selectedCard]);
 
@@ -148,8 +146,8 @@ export function ViewCards() {
                 <Text style={styles.buttonText}>Update Card</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity 
-              style={[styles.deleteButton, isModified && { flex: 1 }]} 
+            <TouchableOpacity
+              style={[styles.deleteButton, isModified && { flex: 1 }]}
               onPress={handleDeleteCard}
             >
               <Text style={styles.buttonText}>Delete Card</Text>

@@ -4,6 +4,16 @@ import { useFocusEffect } from "@react-navigation/native";
 import { FlashCard } from "../types/CardTypes";
 import { CardService } from "../services/CardService";
 
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function CardViewer() {
   const [cards, setCards] = useState<FlashCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -12,7 +22,7 @@ export function CardViewer() {
 
   const loadCards = async () => {
     const loadedCards = await CardService.loadCards();
-    setCards(loadedCards);
+    setCards(shuffleArray(loadedCards));
     setLoading(false);
   };
 
