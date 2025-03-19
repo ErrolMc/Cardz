@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput } from "react-native";
 import { CardService } from "../../services/CardService";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Card = {
   id: string;
@@ -16,9 +17,11 @@ export function ViewCards() {
   const [message, setMessage] = useState("");
   const [isModified, setIsModified] = useState(false);
 
-  useEffect(() => {
-    loadCards();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadCards();
+    }, [])
+  );
 
   useEffect(() => {
     if (selectedCard) {
