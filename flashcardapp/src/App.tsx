@@ -1,11 +1,10 @@
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { CardViewer } from "./components/CardViewer";
 import { DeckBuilder } from "./components/DeckBuilder";
 import { AntDesign, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
-import { CardViewerRoute, DeckBuilderRoute, RouteNames } from "./classes/RouteNames";
+import { CardViewerRoute, DeckBuilderRoute, RouteNames } from "./types/RouteNames";
 
 // Define the type for navigation parameters
 export type RootTabParamList = Record<RouteNames, undefined>;
