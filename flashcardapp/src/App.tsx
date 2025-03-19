@@ -4,8 +4,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { CardViewer } from "./components/CardViewer";
 import { DeckBuilder } from "./components/deckbuilder/DeckBuilder";
 import { ManageCards } from "./components/managecards/ManageCards";
-import { AntDesign, MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
-import { CardViewerRoute, DeckBuilderRoute, ManageCardsRoute, RouteNames } from "./types/RouteNames";
+import { Settings } from "./components/Settings";
+import { AntDesign, MaterialCommunityIcons, Entypo, Ionicons } from "@expo/vector-icons";
+import { CardViewerRoute, DeckBuilderRoute, ManageCardsRoute, SettingsRoute, RouteNames } from "./types/RouteNames";
 
 // Define the type for navigation parameters
 export type RootTabParamList = Record<RouteNames, undefined>;
@@ -24,6 +25,8 @@ export default function App() {
               return <Entypo name="book" size={size} color={color} />;
             } else if (route.name === ManageCardsRoute) {
               return <MaterialCommunityIcons name="card-plus-outline" size={size} color={color} />;
+            } else if (route.name === SettingsRoute) {
+              return <Ionicons name="settings-outline" size={size} color={color} />;
             }
 
             return <AntDesign name="question" size={size} color={color} />;
@@ -46,6 +49,11 @@ export default function App() {
           name={DeckBuilderRoute}
           component={DeckBuilder}
           options={{ title: "Deck Builder" }}
+        />
+        <Tab.Screen
+          name={SettingsRoute}
+          component={Settings}
+          options={{ title: "Settings" }}
         />
       </Tab.Navigator>
     </NavigationContainer>
