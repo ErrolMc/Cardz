@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
-import { CardService } from '../services/CardService';
+import React, { useState } from "react";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
+import { CardService } from "../../services/CardService";
 
-export function DeckBuilder() {
-  const [front, setFront] = useState('');
-  const [back, setBack] = useState('');
-  const [message, setMessage] = useState('');
+export function CreateCard() {
+  const [front, setFront] = useState("");
+  const [back, setBack] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleAddCard = async () => {
     if (!front.trim() || !back.trim()) {
-      setMessage('Please fill in both front and back of the card');
+      setMessage("Please fill in both front and back of the card");
       return;
     }
 
     try {
       await CardService.addCard(front.trim(), back.trim());
-      setFront('');
-      setBack('');
-      setMessage('Card added successfully!');
-      setTimeout(() => setMessage(''), 3000);
+      setFront("");
+      setBack("");
+      setMessage("Card added successfully!");
+      setTimeout(() => setMessage(""), 3000);
     } catch (error) {
-      setMessage('Error adding card');
+      setMessage("Error adding card");
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create New Card</Text>
-      
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -36,7 +36,7 @@ export function DeckBuilder() {
           onChangeText={setFront}
           multiline
         />
-        
+
         <TextInput
           style={styles.input}
           placeholder="Back of card"
@@ -44,7 +44,7 @@ export function DeckBuilder() {
           onChangeText={setBack}
           multiline
         />
-        
+
         <TouchableOpacity style={styles.button} onPress={handleAddCard}>
           <Text style={styles.buttonText}>Add Card</Text>
         </TouchableOpacity>
@@ -58,39 +58,39 @@ export function DeckBuilder() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: "#fff",
+    padding: 20
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center"
   },
   inputContainer: {
-    gap: 15,
+    gap: 15
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
     padding: 12,
     minHeight: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top"
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 15,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center"
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold"
   },
   message: {
-    textAlign: 'center',
-    color: '#007AFF',
-  },
+    textAlign: "center",
+    color: "#007AFF"
+  }
 });
