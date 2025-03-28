@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Modal } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { FlashCard } from "../types/CardTypes";
 import { CardService } from "../services/CardService";
+
+type DisplayOrder = 'front-first' | 'back-first' | 'random';
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
@@ -19,6 +21,8 @@ export function CardViewer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showBack, setShowBack] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [displayOrder, setDisplayOrder] = useState<DisplayOrder>('front-first');
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const loadCards = async () => {
     const loadedCards = await CardService.loadCards();
@@ -30,26 +34,34 @@ export function CardViewer() {
     React.useCallback(() => {
       loadCards();
       setCurrentIndex(0);
-      setShowBack(false);
-    }, [])
+      setShowBack(displayOrder === 'back-first' || (displayOrder === 'random' && Math.random() < 0.5));
+    }, [displayOrder])
   );
 
   const goToNext = () => {
     if (currentIndex < cards.length - 1) {
       setCurrentIndex(currentIndex + 1);
-      setShowBack(false);
+      setShowBack(displayOrder === 'back-first' || (displayOrder === 'random' && Math.random() < 0.5));
     }
   };
 
   const goToPrevious = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
-      setShowBack(false);
+      setShowBack(displayOrder === 'back-first' || (displayOrder === 'random' && Math.random() < 0.5));
     }
   };
 
   const toggleCard = () => {
     setShowBack(!showBack);
+  };
+
+  const getDisplayOrderLabel = (order: DisplayOrder) => {
+    switch (order) {
+      case 'front-first': return 'Show front first';
+      case 'back-first': return 'Show back first';
+      case 'random': return 'Random front/back';
+    }
   };
 
   if (loading) {
@@ -72,9 +84,44 @@ export function CardViewer() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity 
+        style={styles.dropdownButton}
+        onPress={() => setShowDropdown(true)}
+      >
+        <Text style={styles.dropdownButtonText}>{getDisplayOrderLabel(displayOrder)}</Text>
+        <Text style={styles.dropdownArrow}>▼</Text>
+      </TouchableOpacity>
+
+      <Modal
+        visible={showDropdown}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDropdown(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.dropdownMenu}>
+            {(['front-first', 'back-first', 'random'] as DisplayOrder[]).map((order) => (
+              <TouchableOpacity
+                key={order}
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setDisplayOrder(order);
+                  setShowBack(order === 'back-first' || (order === 'random' && Math.random() < 0.5));
+                  setShowDropdown(false);
+                }}
+              >
+                <Text style={styles.dropdownItemText}>{getDisplayOrderLabel(order)}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Modal>
+
       <View style={styles.cardContainer}>
         <TouchableOpacity style={styles.card} onPress={toggleCard}>
-          <Text style={styles.cardText}>{showBack ? currentCard.back : currentCard.front}</Text>
+          <Text style={styles.cardText}>
+            {showBack ? currentCard.back : currentCard.front}
+          </Text>
           <Text style={styles.tapHint}>Tap to see {showBack ? "front" : "back"}</Text>
         </TouchableOpacity>
       </View>
@@ -107,63 +154,102 @@ export function CardViewer() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 20
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
   },
   cardContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center"
+    width: "100%",
+    aspectRatio: 1.5,
+    marginBottom: 20,
   },
   card: {
-    width: "100%",
-    height: 300,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 10,
     padding: 20,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5
+    elevation: 5,
   },
   cardText: {
     fontSize: 24,
-    textAlign: "center"
+    textAlign: "center",
+    marginBottom: 10,
   },
   tapHint: {
-    position: "absolute",
-    bottom: 10,
+    fontSize: 14,
     color: "#666",
-    fontSize: 12
   },
   navigation: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 20
+    width: "100%",
   },
   navButton: {
     backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 5,
     minWidth: 100,
-    alignItems: "center"
+    alignItems: "center",
   },
   disabledButton: {
-    backgroundColor: "#ccc"
+    backgroundColor: "#ccc",
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold"
   },
   counter: {
-    fontSize: 16
-  }
+    fontSize: 16,
+  },
+  dropdownButton: {
+    backgroundColor: "#007AFF",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    marginRight: 8,
+  },
+  dropdownArrow: {
+    color: '#fff',
+    fontSize: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownMenu: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    width: '80%',
+    maxWidth: 300,
+  },
+  dropdownItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
 });
