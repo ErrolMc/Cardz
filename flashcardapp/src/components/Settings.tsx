@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
 import { CardService } from "../services/CardService";
 import { FlashCard } from "../types/CardTypes";
 
@@ -14,32 +14,27 @@ export const Settings = () => {
       const jsonString = JSON.stringify(deck, null, 2);
 
       if (Platform.OS === 'android') {
-        // Android: Use Storage Access Framework
-        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        
-        if (permissions.granted) {
-          // Get the directory uri that the user picked
-          const directoryUri = permissions.directoryUri;
-          
-          // Create a new file in the selected directory
+        // Android: Use directory picker
+        try {
+          const directory = await Directory.pickDirectoryAsync();
           const fileName = `flashcards_${new Date().toISOString().split('T')[0]}.json`;
-          const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
-            directoryUri,
-            fileName,
-            'application/json'
-          );
-          
-          // Write the content to the file
-          await FileSystem.StorageAccessFramework.writeAsStringAsync(fileUri, jsonString);
+          const file = new File(directory.uri, fileName);
+          file.write(jsonString);
           Alert.alert('Success', 'Flashcards exported successfully!');
+        } catch (error) {
+          // Fallback to document directory if picker fails
+          const documentDirectory = Paths.document;
+          const fileName = `flashcards_${new Date().toISOString().split('T')[0]}.json`;
+          const file = new File(documentDirectory.uri, fileName);
+          file.write(jsonString);
+          Alert.alert('Success', `Flashcards exported to Documents/${fileName}`);
         }
       } else {
         // iOS: Use document directory
-        const documentDirectory = FileSystem.documentDirectory;
+        const documentDirectory = Paths.document;
         const fileName = `flashcards_${new Date().toISOString().split('T')[0]}.json`;
-        const filePath = documentDirectory + fileName;
-        
-        await FileSystem.writeAsStringAsync(filePath, jsonString);
+        const file = new File(documentDirectory.uri, fileName);
+        file.write(jsonString);
         Alert.alert('Success', `Flashcards exported to Documents/${fileName}`);
       }
     } catch (error) {
@@ -59,7 +54,8 @@ export const Settings = () => {
         return;
       }
 
-      const content = await FileSystem.readAsStringAsync(result.assets[0].uri);
+      const file = new File(result.assets[0].uri);
+      const content = file.textSync();
       const importedData = JSON.parse(content);
 
       if (!importedData.cards || !Array.isArray(importedData.cards)) {
