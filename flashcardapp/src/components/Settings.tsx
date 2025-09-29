@@ -1,8 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Platform } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { File, Directory, Paths } from "expo-file-system";
+import { File, Paths, FileCreateOptions, Directory } from "expo-file-system";
 import { CardService } from "../services/CardService";
 import { FlashCard } from "../types/CardTypes";
 
@@ -13,30 +14,18 @@ export const Settings = () => {
       const deck = { cards };
       const jsonString = JSON.stringify(deck, null, 2);
 
-      if (Platform.OS === 'android') {
-        // Android: Use directory picker
-        try {
-          const directory = await Directory.pickDirectoryAsync();
-          const fileName = `flashcards_${new Date().toISOString().split('T')[0]}.json`;
-          const file = new File(directory.uri, fileName);
-          file.write(jsonString);
-          Alert.alert('Success', 'Flashcards exported successfully!');
-        } catch (error) {
-          // Fallback to document directory if picker fails
-          const documentDirectory = Paths.document;
-          const fileName = `flashcards_${new Date().toISOString().split('T')[0]}.json`;
-          const file = new File(documentDirectory.uri, fileName);
-          file.write(jsonString);
-          Alert.alert('Success', `Flashcards exported to Documents/${fileName}`);
-        }
+      const fileName = "flashcards.json";
+
+      const file = new File(Paths.cache, fileName);
+      file.create({ overwrite: true, intermediates: true });
+      file.write(jsonString);
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(file.uri);
       } else {
-        // iOS: Use document directory
-        const documentDirectory = Paths.document;
-        const fileName = `flashcards_${new Date().toISOString().split('T')[0]}.json`;
-        const file = new File(documentDirectory.uri, fileName);
-        file.write(jsonString);
-        Alert.alert('Success', `Flashcards exported to Documents/${fileName}`);
+        Alert.alert("Sharing not available", "Please enable sharing in your device settings.");
       }
+
     } catch (error) {
       Alert.alert("Export Error", "Failed to export flashcards.");
       console.error(error);
@@ -55,8 +44,7 @@ export const Settings = () => {
       }
 
       const file = new File(result.assets[0].uri);
-      const content = file.textSync();
-      const importedData = JSON.parse(content);
+      const importedData = JSON.parse(file.textSync());
 
       if (!importedData.cards || !Array.isArray(importedData.cards)) {
         throw new Error("Invalid file format");
